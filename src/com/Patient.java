@@ -2,16 +2,16 @@ package com;
 
 public class Patient
 {
-    enum Gender
+    String firstName;
+    String middleName;
+    String lastName;
+    int age;
+    String gender;
+    String phone;
+
+    public Patient()
     {
-        MALE,
-        FEMALE,
+
     }
 
-    private String firstName;
-    private String middleName;
-    private String lastName;
-    private int age;
-    private Gender gender;
-    private String number;
 }
