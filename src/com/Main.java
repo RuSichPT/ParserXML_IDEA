@@ -4,13 +4,18 @@ public class Main
 {
     public static void main(String[] args)
     {
-        if (args.length != 0)
+        if (args.length == 0)
         {
-            ParserXML parserXML = new ParserXML(args[0]);
+            throw new RuntimeException("no arguments");
         }
-        else
+
+        ParserXML parserXML = new ParserXML(args[0]);
+
+        if (args.length == 2)
         {
-            System.out.println("no arguments");
+            parserXML.sort(args[1]);
         }
+
+        parserXML.print();
     }
 }

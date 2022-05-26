@@ -3,14 +3,14 @@ package com;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
+import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Comparator;
 
 public class ParserXML
 {
@@ -18,16 +18,13 @@ public class ParserXML
 
     public ParserXML(String path)
     {
-        patientsList = new ArrayList<>();
+        patientsList = new ArrayList<Patient>();
 
-        try
-        {
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            DocumentBuilder db = dbf.newDocumentBuilder();
+        try {
+            DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             Document doc = db.parse(new File(path));
 
             Node root = doc.getDocumentElement();
-
             NodeList patients = root.getChildNodes();
 
             for (int i = 0; i < patients.getLength(); i++)
@@ -42,57 +39,49 @@ public class ParserXML
                         Node property = properties.item(j);
                         if (property.getNodeType() != Node.TEXT_NODE)
                         {
-                            fillPropertyPatient(patient,property);
+                            patient.fillProperty(property);
                         }
                     }
                     patientsList.add(patient);
                 }
             }
-
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
-    private void fillPropertyPatient(Patient patient, Node property)
+
+    public void print()
     {
-        String content = property.getTextContent();
-        if (property.getNodeName() == "first_name")
+        for (Patient patient: patientsList)
         {
-            patient.firstName = content;
+            System.out.println(patient);
         }
-        else if (property.getNodeName() == "middle_name")
-        {
-            patient.middleName = content;
-        }
-        else if (property.getNodeName() == "last_name")
-        {
-            patient.lastName = content;
-        }
-        else if (property.getNodeName() == "birthday")
-        {
-            Date currentDate = new Date();
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-            Date birthday = null;
-            try
-            {
-                birthday = format.parse(content);
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-
-            // Перевод количества дней между датами из миллисекунд в года
-            patient.age =  (int)( (currentDate.getTime() - birthday.getTime() ) / (365 * 24 * 60 * 60 * 1000) ); // миллисекунды / (365дн * 4ч * 60мин * 60сек * 1000мс)
-        }
-        else if (property.getNodeName() == "gender")
-        {
-            patient.gender = content;
-        }
-        else if (property.getNodeName() == "phone")
-        {
-            patient.phone = content;
-        }
-
     }
+
+    public void sort(String type)
+    {
+        if (type.equals("name"))
+        {
+            patientsList.sort(new Comparator<Patient>() {
+                @Override
+                public int compare(Patient o1, Patient o2) {
+                    return o1.getLastName().compareTo(o2.getLastName());
+                }
+            });
+        }
+        else if (type.equals("age"))
+        {
+            patientsList.sort(new Comparator<Patient>() {
+                @Override
+                public int compare(Patient o1, Patient o2) {
+                    return o2.getAge() - o1.getAge();
+                }
+            });
+        }
+    }
+
 }
