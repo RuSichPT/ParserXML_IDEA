@@ -1,5 +1,10 @@
 package com;
 
+import de.vandermeer.asciitable.AT_Context;
+import de.vandermeer.asciitable.AsciiTable;
+import de.vandermeer.asciithemes.TA_Grid;
+import de.vandermeer.asciithemes.TA_GridThemes;
+import de.vandermeer.skb.interfaces.transformers.textformat.TextAlignment;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -14,22 +19,22 @@ import java.util.Comparator;
 
 public class ParserXML
 {
-    private ArrayList<Patient> patientsList;
+    private ArrayList<Patient> patients;
 
     public ParserXML(String path)
     {
-        patientsList = new ArrayList<Patient>();
+        patients = new ArrayList<Patient>();
 
         try {
             DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             Document doc = db.parse(new File(path));
 
             Node root = doc.getDocumentElement();
-            NodeList patients = root.getChildNodes();
+            NodeList patientsNodeList = root.getChildNodes();
 
-            for (int i = 0; i < patients.getLength(); i++)
+            for (int i = 0; i < patientsNodeList.getLength(); i++)
             {
-                Node patientNode = patients.item(i);
+                Node patientNode = patientsNodeList.item(i);
                 if (patientNode.getNodeType() != Node.TEXT_NODE)
                 {
                     NodeList properties = patientNode.getChildNodes();
@@ -42,31 +47,41 @@ public class ParserXML
                             patient.fillProperty(property);
                         }
                     }
-                    patientsList.add(patient);
+                    patients.add(patient);
                 }
             }
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-        } catch (SAXException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public void print()
     {
-        for (Patient patient: patientsList)
+        AsciiTable at = new AsciiTable();
+        AT_Context context = at.getContext();
+        context.setGridTheme(TA_GridThemes.NONE);
+        context.setWidth(150);
+
+        at.addRule();
+        at.addRow("ФИО", "Возраст", "Пол", "Телефон");
+        at.addRule();
+        for (Patient patient: patients)
         {
-            System.out.println(patient);
+            String name = patient.getLastName() + " " + patient.getFirstName() + " " + patient.getMiddleName();
+            at.addRow(name, patient.getAge(), patient.getGender(),patient.getPhone());
+            at.addRule();
         }
+
+        String rend = at.render();
+        System.out.println(rend);
+
     }
 
     public void sort(String type)
     {
         if (type.equals("name"))
         {
-            patientsList.sort(new Comparator<Patient>() {
+            patients.sort(new Comparator<Patient>() {
                 @Override
                 public int compare(Patient o1, Patient o2) {
                     return o1.getLastName().compareTo(o2.getLastName());
@@ -75,7 +90,7 @@ public class ParserXML
         }
         else if (type.equals("age"))
         {
-            patientsList.sort(new Comparator<Patient>() {
+            patients.sort(new Comparator<Patient>() {
                 @Override
                 public int compare(Patient o1, Patient o2) {
                     return o2.getAge() - o1.getAge();

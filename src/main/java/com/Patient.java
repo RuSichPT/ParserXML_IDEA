@@ -65,41 +65,25 @@ public class Patient
     public void fillProperty(Node property)
     {
         String content = property.getTextContent();
-        if (property.getNodeName() == "first_name")
-        {
-            setFirstName(content);
-        }
-        else if (property.getNodeName() == "middle_name")
-        {
-            setMiddleName(content);
-        }
-        else if (property.getNodeName() == "last_name")
-        {
-            setLastName(content);
-        }
-        else if (property.getNodeName() == "birthday")
-        {
-            Date currentDate = new Date();
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-            try
-            {
-                Date birthday = format.parse(content);
-                // Перевод количества дней между датами из миллисекунд в года
-                int age =  (int)( (currentDate.getTime() - birthday.getTime() ) / ( (long) 365* 24 * 60 * 60 * 1000) ); // миллисекунды / (365дн * 4ч * 60мин * 60сек * 1000мс)
-                setAge(age);
+        switch (property.getNodeName()) {
+            case "first_name" -> setFirstName(content);
+            case "middle_name" -> setMiddleName(content);
+            case "last_name" -> setLastName(content);
+            case "birthday" -> {
+                Date currentDate = new Date();
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                try {
+                    Date birthday = format.parse(content);
+                    // Перевод количества дней между датами из миллисекунд в года
+                    int age = (int) ((currentDate.getTime() - birthday.getTime()) / ((long) 365 * 24 * 60 * 60 * 1000)); // миллисекунды / (365дн * 4ч * 60мин * 60сек * 1000мс)
+                    setAge(age);
 
-            } catch (ParseException e) {
-                e.printStackTrace();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
             }
-
-        }
-        else if (property.getNodeName() == "gender")
-        {
-            setGender(content);
-        }
-        else if (property.getNodeName() == "phone")
-        {
-            setPhone(content);;
+            case "gender" -> setGender(content);
+            case "phone" -> setPhone(content);
         }
     }
 
